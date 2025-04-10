@@ -1,47 +1,39 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-from werkzeug.utils import secure_filename
-from image_handler import is_spravka 
+from fastapi import FastAPI, Request, File, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from image_handler import is_spravka
+import shutil
 import os
+import uuid
 
-app = Flask("spravka vision")
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['PROCESSED_FOLDER'] = 'processed'
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
+app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
-@app.route("/", methods = ["GET", "POST"])
-def home():
-    if (request.method == "POST"):
-        if 'file' not in request.files:
-            return redirect(request.url)
-        file = request.files['file']
-        filename = secure_filename(file.filename)
-        print(filename)
-        input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(input_path)
-                
-        return redirect(url_for('is_spravka_route', filename=filename))
-    return render_template("upload.html")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.route('/processed/<filename>')
-def processed_file(filename):
-    return render_template('processed.html', filename=filename)
+@app.post("/upload")
+async def upload_image(file: UploadFile = File(...)):
+    file_ext = file.filename.split('.')[-1]
+    unique_name = f"{uuid.uuid4()}.{file_ext}"
+    save_path = os.path.join("uploads", unique_name)
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    with open(save_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    text = ""
+    if is_spravka(save_path):
+        text = "СПРАВОЧКА"
+    else:
+        text = "не справка((((("
 
-@app.route('/processed_images/<filename>')
-def processed_image(filename):
-    return send_from_directory(app.config['PROCESSED_FOLDER'], filename)
-
-@app.route("/is_spravka/<filename>")
-def is_spravka_route(filename):
-    if (is_spravka(filename)):
-        return render_template("is_spravka.html", text="СПРАВОЧКА")
-    else: return render_template("is_spravka.html", text="не справка(((")
-
-if __name__ == "__main__":
-    app.run()
-
+    return JSONResponse(content={
+        "text": text,
+        "image_url": f"/uploads/{unique_name}"
+    })
 
