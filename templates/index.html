@@ -17,14 +17,16 @@
             </nav>
         </div>
     </header>
+    
+    <div class="main-container">
+        <h1>Загрузите изображение справки</h1>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <button type="submit">Отправить</button>
+        </form>
 
-    <h1>Загрузите изображение справки</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Отправить</button>
-    </form>
-
-    <div id="result" style="margin-top: 20px;"></div>
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
 
     <script>
         const form = document.getElementById("upload-form");
