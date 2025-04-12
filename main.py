@@ -37,3 +37,6 @@ async def upload_image(file: UploadFile = File(...)):
         "image_url": f"/uploads/{unique_name}"
     })
 
+@app.get("/how", response_class=HTMLResponse)
+async def how(request: Request):
+    return templates.TemplateResponse("how.html", {"request": request})

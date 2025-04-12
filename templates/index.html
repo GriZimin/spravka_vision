@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Загрузка изображения</title>
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <h1>Загрузите изображение</h1>
+    <header>
+        <div class="container">
+            <div class="logo">Spravka Vision</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="how">Как это работает?</a></li>
+                    <li><a href="https://github.com/GriZimin/spravka_vision">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <h1>Загрузите изображение справки</h1>
     <form id="upload-form" enctype="multipart/form-data">
         <input type="file" name="file" accept="image/*" required>
         <button type="submit">Отправить</button>
