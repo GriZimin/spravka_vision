@@ -1,8 +1,31 @@
+from PIL import Image
+import pytesseract
 import cv2
+import os
 import onnxruntime as ort
 import yolo_classify_postprocess
 import yolo_preprocess
 import cursive_reader
+
+def draw(img_filename):
+    image = cv2.imread(os.path.join("uploads" , img_filename))  
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    data = pytesseract.image_to_data(rgb, output_type=pytesseract.Output.DICT, lang="rus")
+
+    n_boxes = len(data['text'])
+    for i in range(n_boxes):
+        if int(data['conf'][i]) > 0 and data['text'][i].strip() != '':
+            (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    #cv2.imshow('Words', image)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+    cv2.imwrite(os.path.join("processed", "printed", img_filename), image)
+
+    # boxes_uploads/img_filename
+    # uploads/boxes_img_filename
+
 
 # Path to your YOLO11m ONNX model file
 model_path = "models/classifier.onnx"
@@ -11,25 +34,7 @@ model_path = "models/classifier.onnx"
 session = ort.InferenceSession(model_path)
 input_name = session.get_inputs()[0].name
 output_name = session.get_outputs()[0].name
-input_shape = session.get_inputs()[0].shape  # e.g., [1, 3, 640, 640]
-
-
-def is_spravka(image_path):
-    image = cv2.imread(image_path)
-    if image is None:
-        print("Error: Unable to load image!")
-        return
-
-    # Preprocess the image
-    input_blob = yolo_preprocess.preprocess_image(image, input_shape)
-
-    # Run inference with ONNXRuntime
-    results = session.run([output_name], {input_name: input_blob})
-    output_data = results[0]
-
-    # Post-process the output to extract detection results
-    detected_class, conf = yolo_classify_postprocess.postprocess(output_data)
-    return (detected_class == "spravka")
+input_shape = session.get_inputs()[0].shape  # e.g., [1, 3, 640, 640k
 
 def process_handwritting(image_path, output_path):
     data = cursive_reader.process_image(image_path, output_path)
@@ -48,3 +53,19 @@ def process_handwritting(image_path, output_path):
             outstr += f"Cлово ({elem[1]}): {elem[3]}\n"
     return outstr
 
+def is_spravka(image_path):
+    image = cv2.imread(image_path)
+    if image is None:
+        print("Error: Unable to load image!")
+        return
+
+    # Preprocess the image
+    input_blob = yolo_preprocess.preprocess_image(image, input_shape)
+
+    # Run inference with ONNXRuntime
+    results = session.run([output_name], {input_name: input_blob})
+    output_data = results[0]
+
+    # Post-process the output to extract detection results
+    detected_class, conf = yolo_classify_postprocess.postprocess(output_data)
+    return (detected_class == "spravka")
