@@ -7,6 +7,12 @@ import shutil
 import os
 import uuid
 
+try:
+    os.mkdir("uploads")
+    os.mkdir("boxes_uploads")
+except:
+    pass
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
