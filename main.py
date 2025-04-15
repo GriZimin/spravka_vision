@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from image_handler import is_spravka
+from image_handler import is_spravka, tess_get, draw
 import shutil
 import os
 import uuid
@@ -12,6 +12,7 @@ templates = Jinja2Templates(directory="templates")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/boxes_uploads", StaticFiles(directory="boxes_uploads"), name="boxes_uploads")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -28,13 +29,16 @@ async def upload_image(file: UploadFile = File(...)):
     
     text = ""
     if is_spravka(save_path):
-        text = "СПРАВОЧКА"
+        text = "СПРАВОЧКА\n"
     else:
-        text = "не справка((((("
+        text = "не справка(((((\n"
+
+    text += tess_get(save_path)
+    draw(save_path)
 
     return JSONResponse(content={
         "text": text,
-        "image_url": f"/uploads/{unique_name}"
+        "image_url": f"/boxes_uploads/{unique_name}"
     })
 
 @app.get("/how", response_class=HTMLResponse)
