@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory="templates")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-app.mount("/boxes_uploads", StaticFiles(directory="boxes_uploads"), name="boxes_uploads")
+app.mount("/processed/printed", StaticFiles(directory="processed/printed"), name="processed/printed")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -34,17 +34,17 @@ async def upload_image(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     text = ""
-    if is_spravka(save_path):
+    if is_spravka(unique_name):
         text = "СПРАВОЧКА\n"
     else:
         text = "не справка(((((\n"
 
-    text += tess_get(save_path)
-    draw(save_path)
+    text += tess_get(unique_name)
+    draw(unique_name)
 
     return JSONResponse(content={
         "text": text,
-        "image_url": f"/boxes_uploads/{unique_name}"
+        "image_url": f"/processed/printed/{unique_name}"
     })
 
 @app.get("/how", response_class=HTMLResponse)

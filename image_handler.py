@@ -2,20 +2,21 @@ from ultralytics import YOLO
 from PIL import Image
 import pytesseract
 import cv2
+import os
 
 model = YOLO("best.pt")
 
 def is_spravka(img_filename):
-    result = model.predict(source=img_filename)[0]   
+    result = model.predict(source=os.path.join("uploads", img_filename))[0]   
     return (result.probs.top1 == 1)
 
 def tess_get(img_filename):
-    img = Image.open(img_filename)
+    img = Image.open(os.path.join("uploads", img_filename))
     return pytesseract.image_to_string(img, lang="rus")
 
 
 def draw(img_filename):
-    image = cv2.imread(img_filename)  
+    image = cv2.imread(os.path.join("uploads" , img_filename))  
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     data = pytesseract.image_to_data(rgb, output_type=pytesseract.Output.DICT, lang="rus")
 
@@ -28,8 +29,7 @@ def draw(img_filename):
     #cv2.imshow('Words', image)
     #cv2.waitKey(0)
     #cv2.destroyAllWindows()
-    print("boxes_" + img_filename)
-    cv2.imwrite("boxes_" + img_filename, image)
+    cv2.imwrite(os.path.join("processed", "printed", img_filename), image)
 
     # boxes_uploads/img_filename
     # uploads/boxes_img_filename
