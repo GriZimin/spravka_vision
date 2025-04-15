@@ -9,7 +9,9 @@ import uuid
 
 try:
     os.mkdir("uploads")
-    os.mkdir("boxes_uploads")
+    os.mkdir("processed")
+    os.mkdir("processed/printed")
+    os.mkdir("processed/handwriten")
 except:
     pass
 
@@ -19,6 +21,7 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/processed/printed", StaticFiles(directory="processed/printed"), name="processed/printed")
+app.mount("/processed/handwriten", StaticFiles(directory="processed/handwriten"), name="processed/handwriten")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
