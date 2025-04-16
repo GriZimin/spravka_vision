@@ -55,12 +55,13 @@
                     <div id="imgs">
                         <img src="${data.image1_url}" alt="Загруженное изображение" style="max-width: 400px; border: 1px solid #ccc;">`
 
-                if (`${data.result}` == "СПРАВОЧКА") {
+                if (`${data.result}` == "Класс: справка") {
                     finalText += processed;
                 }
 
                 finalText += `</div>
                     <h3>${data.result}</h3>
+                    <h4>${data.name}</h4>
                     <div>${data.text}</div>`;
                 
                 resultDiv.innerHTML = finalText;

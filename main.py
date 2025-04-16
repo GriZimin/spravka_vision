@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from image_handler import is_spravka, tess_get, draw, process_handwritting
+from image_handler import is_spravka, tess_get, draw, process_handwritting, get_name
 import shutil
 import os
 import uuid
@@ -36,20 +36,24 @@ async def upload_image(file: UploadFile = File(...)):
     with open(save_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    spravka_detection = ""
+    spravka_detection = "Класс: "
     text = ""
-
+    name = ""
     if is_spravka(save_path):
-        spravka_detection = "СПРАВОЧКА"
-        text = tess_get(unique_name)
+        spravka_detection += "справка"
+        handwriten = process_handwritting(save_path, os.path.join("processed", "handwriten", unique_name)).replace('\n', "<br>") + "<br>"
+        printed = tess_get(unique_name) + "<br>"
+        text = handwriten + printed
+        name = get_name(printed, handwriten)
+        name = name[name.find("<name>"):name.find("</name>")]
         draw(unique_name)
-        text += process_handwritting(save_path, os.path.join("processed", "handwriten", unique_name))
     else:
-        spravka_detection = "не справка((((("
+        spravka_detection += "не справка"
 
 
     return JSONResponse(content={
         "result": spravka_detection,
+        "name" : name,
         "text" : text,
         "image1_url": f"uploads/{unique_name}",
         "image2_url": f"/processed/printed/{unique_name}",
