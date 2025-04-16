@@ -46,11 +46,15 @@ button:hover {
     background-color: #1E4474;
 }
 
-#result img {
+#imgs img {
     max-width: 100%;
     margin-top: 10px;
     border-radius: 6px;
     border: 1px solid #E5E7EB;
+}
+
+#imgs {
+    display: flex;
 }
 
 pre {

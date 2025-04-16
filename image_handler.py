@@ -7,6 +7,18 @@ import yolo_classify_postprocess
 import yolo_preprocess
 import cursive_reader
 
+model_path = "models/classifier.onnx"
+
+# Load ONNX model
+session = ort.InferenceSession(model_path)
+input_name = session.get_inputs()[0].name
+output_name = session.get_outputs()[0].name
+input_shape = session.get_inputs()[0].shape  # e.g., [1, 3, 640, 640k
+
+def tess_get(img_filename):
+    img = Image.open(os.path.join("uploads", img_filename))
+    return pytesseract.image_to_string(img, lang="rus")
+
 def draw(img_filename):
     image = cv2.imread(os.path.join("uploads" , img_filename))  
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -18,23 +30,8 @@ def draw(img_filename):
             (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    #cv2.imshow('Words', image)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
     cv2.imwrite(os.path.join("processed", "printed", img_filename), image)
 
-    # boxes_uploads/img_filename
-    # uploads/boxes_img_filename
-
-
-# Path to your YOLO11m ONNX model file
-model_path = "models/classifier.onnx"
-
-# Load ONNX model
-session = ort.InferenceSession(model_path)
-input_name = session.get_inputs()[0].name
-output_name = session.get_outputs()[0].name
-input_shape = session.get_inputs()[0].shape  # e.g., [1, 3, 640, 640k
 
 def process_handwritting(image_path, output_path):
     data = cursive_reader.process_image(image_path, output_path)
@@ -56,7 +53,7 @@ def process_handwritting(image_path, output_path):
 def is_spravka(image_path):
     image = cv2.imread(image_path)
     if image is None:
-        print("Error: Unable to load image!")
+        print(f"Error: Unable to load image! :{image_pat}")
         return
 
     # Preprocess the image

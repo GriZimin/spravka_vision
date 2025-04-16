@@ -44,12 +44,27 @@
                 });
 
                 const data = await response.json();
+                
+                const processed = ` 
+                    <img src="${data.image2_url}" alt="Печатный текст" style="max-width: 400px; border: 1px solid #ccc;">
+                    <img src="${data.image3_url}" alt="Рукописный текст" style="max-width: 400px; border: 1px solid #ccc;">
+                `
 
-                resultDiv.innerHTML = `
+                var finalText = `
                     <h2>Результат обработки:</h2>
-                    <img src="${data.image_url}" alt="Загруженное изображение" style="max-width: 400px; border: 1px solid #ccc;">
-                    <h3>${data.text}</h3>
-                `;
+                    <div id="imgs">
+                        <img src="${data.image1_url}" alt="Загруженное изображение" style="max-width: 400px; border: 1px solid #ccc;">`
+
+                if (`${data.result}` == "СПРАВОЧКА") {
+                    finalText += processed;
+                }
+
+                finalText += `</div>
+                    <h3>${data.result}</h3>
+                    <div>${data.text}</div>`;
+                
+                resultDiv.innerHTML = finalText;
+
             } catch (error) {
                 resultDiv.innerHTML = `<p style="color:red;">Ошибка при отправке</p>`;
                 console.error("Ошибка:", error);

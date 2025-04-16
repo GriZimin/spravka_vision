@@ -8,7 +8,7 @@ import recognition
 
 
 config = {
-    "yolo_cursive": "yolo11n_cursive_v6_5.onnx",
+    "yolo_cursive": "models/yolo11n_cursive_v6_5.onnx",
     "yolo_cursive_model_classes": ["cursive", "signature", "stamp"]
 }
 
